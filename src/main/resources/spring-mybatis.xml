@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context-4.0.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+     http://www.springframework.org/schema/cache 
+     http://www.springframework.org/schema/cache/spring-cache-4.0.xsd">
+
+	<!-- 分解配置 jdbc.properites -->
+	<context:property-placeholder location="classpath:db.properties" />
+	
+	<!-- 数据源配置, 使用 BoneCP 数据库连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 数据源驱动类可不写，Druid默认会自动根据URL识别DriverClass -->
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="1" />
+		<property name="minIdle" value="1" />
+		<property name="maxActive" value="10" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="60000" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<!-- 验证连接有效与否的SQL，不同的数据配置不同 --> 
+		<property name="validationQuery" value="SELECT 'x'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="true" />
+		<property name="testOnReturn" value="true" />
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小（Oracle使用）  -->
+		<!-- <property name="poolPreparedStatements"  value="true" />      
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="20" /> -->
+		<!-- 这里配置提交方式，默认就是TRUE，可以不用配置 -->
+  		<property name="defaultAutoCommit" value="true" />
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 --> 
+		<property name="poolPreparedStatements" value="true" /> 
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+		
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="stat" />
+		<property name="proxyFilters"> 
+			<list> 
+				<ref bean="logFilter" /> 
+			</list> 
+		</property> 
+	</bean>
+	<bean id="logFilter" class="com.alibaba.druid.filter.logging.Slf4jLogFilter"> 
+		<property name="statementExecutableSqlLogEnable" value="false" /> 
+	</bean>
+	
+	<!-- 装配log4j -->
+	<!-- <bean id="dataSourceLog4j" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+		<constructor-arg ref="dataSource" />
+	</bean> -->
+
+
+	<!-- sessionFactory 将spring和mybatis整合 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations">
+			<array>
+				<value>classpath*:**/*-mapper.xml</value>
+			</array>
+		</property>
+		<!-- 加载mybatis全局配置文件 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+	</bean>
+	<!-- 由于整合了mybatis，所以要使用注解方式的话按照如下配置，到接口中再添加@Repository -->
+	<!-- <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="wongtp.**.dao" />
+		<property name="sqlSessionTemplateBeanName" value="sqlSessionTemplate" />
+	</bean> -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="*add*" propagation="REQUIRED" />
+			<tx:method name="*append*" propagation="REQUIRED" />
+			<tx:method name="*insert*" propagation="REQUIRED" />
+			<tx:method name="*save*" propagation="REQUIRED" />
+			<tx:method name="*update*" propagation="REQUIRED" />
+			<tx:method name="*modify*" propagation="REQUIRED" />
+			<tx:method name="*edit*" propagation="REQUIRED" />
+			<tx:method name="*delete*" propagation="REQUIRED" />
+			<tx:method name="*remove*" propagation="REQUIRED" />
+			<tx:method name="*repair" propagation="REQUIRED" />
+			<tx:method name="*delAndRepair" propagation="REQUIRED" />
+			<tx:method name="*get*" propagation="SUPPORTS" />
+			<tx:method name="*find*" propagation="SUPPORTS" />
+			<tx:method name="*load*" propagation="SUPPORTS" />
+			<tx:method name="*search*" propagation="SUPPORTS" />
+			<tx:method name="*datagrid*" propagation="SUPPORTS" />
+			<tx:method name="*select4*" propagation="SUPPORTS" />
+			<tx:method name="*" propagation="SUPPORTS" />
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+		<aop:pointcut id="transactionPointcut" expression="execution(* com.wongtp.**.service..*Impl.*(..))" />
+		<aop:advisor pointcut-ref="transactionPointcut" advice-ref="transactionAdvice" />
+	</aop:config>
+	
+	<bean id="baseDao" class="com.wongtp.base.dao.impl.BaseDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	<bean id="com.wongtp.base.dao.impl.BaseDaoImpl" class="com.wongtp.base.dao.impl.BaseDaoImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+</beans>

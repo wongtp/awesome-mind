@@ -21,9 +21,10 @@ public class HelloController {
 		
 	}
 	
-	@RequestMapping("/index2")
+	@RequestMapping("/{id}")
 	public String index2(HttpServletRequest request, HttpServletResponse response) {
-		return "hello/index2";
+		String p = request.getParameter("p");
+		return "hello/" + p;
 		
 	}
 	

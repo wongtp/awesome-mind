@@ -116,10 +116,10 @@
 		<aop:advisor pointcut-ref="transactionPointcut" advice-ref="transactionAdvice" />
 	</aop:config>
 	
-	<bean id="baseDao" class="com.wongtp.base.dao.impl.BaseDaoImpl">
+	<bean id="baseDao" class="com.wongtp.base.service.impl.BaseDaoImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 	</bean>
-	<bean id="com.wongtp.base.dao.impl.BaseDaoImpl" class="com.wongtp.base.dao.impl.BaseDaoImpl">
+	<bean id="com.wongtp.base.service.impl.BaseDaoImpl" class="com.wongtp.base.service.impl.BaseDaoImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 	</bean>
 </beans>

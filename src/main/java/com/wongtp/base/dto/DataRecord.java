@@ -4,25 +4,19 @@
  */
 package com.wongtp.base.dto;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-/**
- * 用于映射数据行的POJO类，以map的形式存在。
- * 并用于传递查询参数。
- * @author Leon Tao
- * @date 2010-2-25 下午06:29:53
- */
-//TODO 完善数据METADATA信息缓存和管理
-public class DataRecord extends HashMap<String, Object> implements DTO {
+public class DataRecord extends HashMap<String, Object> implements Serializable {
 	
-	//private static final Logger logger = LoggerFactory.getLogger(DataRecord.class);
-	
+	private static final Logger logger = LoggerFactory.getLogger(DataRecord.class);
 	private static final long serialVersionUID = 1L;
 
 	public DataRecord() {}
@@ -38,22 +32,21 @@ public class DataRecord extends HashMap<String, Object> implements DTO {
 		return super.get(((String)key).toUpperCase());
     }
     
-    public String getString(String key){
+    public String getString(String key) {
     	try{
     		Object temp = get(key);
-    		if(null != temp){
+    		if(null != temp) {
     			return temp.toString();
-    		}else{
+    		}else {
     			return null;
     		}
-    		//return (String)(get(key));
-    	}catch(ClassCastException e){
-    		//logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
+    	}catch(ClassCastException e) {
+    		logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
     		return null;
     	}
     }
     
-    public Long getLong(String key){
+    public Long getLong(String key) {
     	try{
     		Object temp = get(key);
     		if(temp instanceof BigDecimal){
@@ -65,53 +58,53 @@ public class DataRecord extends HashMap<String, Object> implements DTO {
     			return null;
     		}
     	}catch(Exception e){
-    		//logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
+    		logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
     		return null;
     	}
     }
     
-    public Integer getInteger(String key){
+    public Integer getInteger(String key) {
     	try{
     		BigDecimal val= ((BigDecimal)(get(key)));
     		return val==null?null:val.intValue();
-    	}catch(Exception e){
-    		//logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
+    	}catch(Exception e) {
+    		logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
     		return null;
     	}
     }
     
-    public Double getDouble(String key){
-    	try{
+    public Double getDouble(String key) {
+    	try {
     		BigDecimal val= ((BigDecimal)(get(key)));
     		return val==null?null:val.doubleValue();
-    	}catch(Exception e){
-    		//logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
+    	}catch(Exception e) {
+    		logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
     		return null;
     	}
     }
     
-    public Date getDate(String key){
+    public Date getDate(String key) {
     	try{
     		return (Date)(get(key));
-    	}catch(ClassCastException e){
-    		//logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
+    	}catch(ClassCastException e) {
+    		logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
     		return null;
     	}
     }
     
-    public String getDateString(String key, String format){
+    public String getDateString(String key, String format) {
     	Date date = getDate(key);;
-    	if(date==null){
+    	if(date==null) {
     		return null;
     	}
-    	if(StringUtils.isEmpty(format)){
+    	if(StringUtils.isEmpty(format)) {
     		getDateString(key);
     	}
     	try{
     		DateFormat df = new SimpleDateFormat(format);
         	return df.format(date);
     	}catch(Exception e){
-    		//logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
+    		logger.warn("转换数据异常。key=" + key + ", value=" + get(key), e);
     		return null;
     	}
     }
